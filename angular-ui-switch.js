@@ -6,7 +6,7 @@ angular.module('uiSwitch', [])
     var extraMethod = null;
 
     if (attrs.ngChange) {
-      extraMethod = attrs.ngChange;
+      extraMethod = 'ngChange()';
     }
 
     html += '<span';
@@ -49,7 +49,8 @@ angular.module('uiSwitch', [])
     restrict: 'E',
     replace: true,
     scope: {
-      ngModel: '='
+      ngModel: '=',
+      ngChange: '&'
     },
     template: template,
     link: link
