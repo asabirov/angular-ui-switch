@@ -1,11 +1,14 @@
 angular.module('uiSwitch', [])
 
-.directive('switch', function(){
+.directive('switch', ['$parse', function($parse) {
   return {
-    restrict: 'AE'
-  , replace: true
-  , transclude: true
-  , template: function(element, attrs) {
+    restrict: 'E',
+    replace: true,
+    transclude: true,
+    scope: {
+      ngModel: '='
+    },
+    template: function(element, attrs) {
       var html = '';
       var extraMethod = '';
 
@@ -21,13 +24,9 @@ angular.module('uiSwitch', [])
       html +=   ' class="switch' + (attrs.class ? ' ' + attrs.class : '')
       html +=   attrs.size ? ' switchery-' + attrs.size : '';  /*switch size from small to large*/
       html +=   '"';
-      if (attrs.onValue && attrs.offValue) {
-          html += attrs.ngModel ? ' ng-click="' + attrs.disabled + ' ? ' + attrs.ngModel + ' : ' + attrs.ngModel + '=(' + attrs.ngModel + '=== \'' + (attrs.onValue || true) + '\' ? \'' + (attrs.offValue || false) + '\':\'' + (attrs.onValue || true) + '\')' + extraMethod + '"' : '';
-          html += ' ng-class="{ checked:' + attrs.ngModel + '===\'' + (attrs.onValue || true) + '\'?' + 'true' + ':' + 'false' + ', disabled:' + attrs.disabled + ' }"';
-      } else {
-          html += attrs.ngModel ? ' ng-click="' + attrs.disabled + ' ? ' + attrs.ngModel + ' : ' + attrs.ngModel + '=!' + attrs.ngModel + extraMethod +'"' : '';
-          html += ' ng-class="{ checked:' + attrs.ngModel + ', disabled:' + attrs.disabled + ' }"';
-      }
+
+      html +=   attrs.ngModel ? ' ng-click="' + attrs.disabled + ' ? null : (ngModel = (ngModel == onValue ? offValue : onValue))' + extraMethod +'"' : '';
+      html +=   ' ng-class="{ checked: ngModel == onValue, disabled:' + attrs.disabled + ' }"';
 
       html +=   '>';
       html +=   '<small></small>';
@@ -41,6 +40,18 @@ angular.module('uiSwitch', [])
       html +=     attrs.off ? '<span class="off">'+attrs.off + '</span>' : ' ';  /*switch text off value set by user in directive html markup*/
       html += '</span>';
       return html;
+    },
+    link: function (scope, element, attrs) {
+      if (attrs.hasOwnProperty('onValue')) {
+        scope.onValue = $parse(attrs.onValue)(scope);
+      } else {
+        scope.onValue = true;
+      }
+      if (attrs.hasOwnProperty('offValue')) {
+        scope.offValue = $parse(attrs.offValue)(scope);
+      } else {
+        scope.onValue = false;
+      }
     }
   }
-});
+}]);
